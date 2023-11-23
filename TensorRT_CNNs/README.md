@@ -122,3 +122,13 @@ cd TensorRT-${version}/onnx_graphsurgeon
     
 python3 -m pip install onnx_graphsurgeon-0.3.12-py2.py3-none-any.whl
 ```
+
+Change the timeout configuration on JetsonNano (as root)
+```
+echo 300000 > /sys/kernel/debug/gpu.0/ch_wdt_timeout_ms 
+```
+
+Disable the timeout configuration on JetsonNano (as root)
+```
+echo N > /sys/kernel/debug/gpu.0/timeouts_enabled 
+```
