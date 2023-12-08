@@ -107,7 +107,7 @@ def main(args):
                 sdc_line = f"{batch}: {tuple(k)}: {int_view_original_val:08X}; {int_view_faulty_val:08X}; {xor_result:08X}"
                 print(sdc_line)
 
-        #os.remove(dataset_file)
+        os.remove(dataset_file)
 
 
 if __name__=="__main__":
