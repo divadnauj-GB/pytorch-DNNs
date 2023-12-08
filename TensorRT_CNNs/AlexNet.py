@@ -108,6 +108,7 @@ def main(args):
         gacc1=0
         gacc5=0
         Inputs =[]
+        Labels = []
         Output = []
         dummy_input = None
         with torch.no_grad():
@@ -116,11 +117,13 @@ def main(args):
                 labels = labels.to(device, non_blocking=True)
                 if batch == 0: dummy_input = images
                 Inputs.append(images.detach().cpu())
+                Labels.append(labels.detach().cpu())
                 # if(labels[0].item()==0):
                 outputs = model(images)
                 Output.append(outputs.detach().cpu())
                 # sorted, indices=torch.sort(outputs.data)
                 pred, clas=outputs.cpu().topk(5,1,True,True)
+                
                 clas = clas.t()
                 Res = clas.eq(labels[None].cpu())
                 acc1 = Res[:1].sum(dim=0,dtype=torch.float32)
@@ -146,6 +149,9 @@ def main(args):
         embeddings_input = (
                 torch.cat(Inputs).cpu().numpy()
             )
+        embeddings_label = (
+                torch.cat(Labels).cpu().numpy()
+            )
                
         log_path_file = os.path.join(
                 directory, f"Inputs_DNN.h5"
@@ -154,6 +160,9 @@ def main(args):
         with h5py.File(log_path_file, "w") as hf:
             hf.create_dataset(
                 "inputs", data=embeddings_input, compression="gzip"
+            )
+            hf.create_dataset(
+                "labels", data=embeddings_label, compression="gzip"
             )
 
         embeddings_output = (torch.cat(Output).cpu().numpy())

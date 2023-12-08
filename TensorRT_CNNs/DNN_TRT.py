@@ -19,7 +19,7 @@ def get_argparser():
     parser.add_argument('-trt','--run_trt', required=False, action='store_true', help='golden')
     return parser
 
-DEBUG = 1
+DEBUG = 0
 
 def main(args):
 
