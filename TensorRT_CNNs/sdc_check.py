@@ -35,8 +35,13 @@ def int_view_float(h):
 
 def get_argparser():
     parser = argparse.ArgumentParser(description='DNN models')
-    parser.add_argument('-ln','--layer_number', required=True, type=int, help='golden')
+    parser.add_argument('-t','--type', required=True, type=str, help='golden')
+    parser.add_argument('-n','--model_name', required=True, type=str, help='golden')
+    parser.add_argument('-ln','--layer_number', required=False, type=int, help='golden')
     parser.add_argument('-bs','--batch_size', required=True, type=int, help='golden')
+    parser.add_argument('-sz','--shape',required=False, nargs='+', type=int ,help="shape of the output layer")
+    parser.add_argument('-onnx','--onnx', required=False, action='store_true', help='golden')
+    parser.add_argument('-trt','--run_trt', required=False, action='store_true', help='golden')
     parser.add_argument('-v','--verbose', required=False, type=int, help='golden')
     return parser
 
@@ -47,22 +52,25 @@ def main(args):
     #current_path = os.getcwd()
     current_path = os.path.dirname(__file__)
 
+    path_dir = f"{args.type}/{args.model_name}"
+    current_path=os.path.join(current_path,path_dir)
+    
     dataset_file = os.path.join(
         current_path,
-        f"Golden_Output_layer.h5",
+        f"Golden_Outputs_DNN.h5",
     )
 
     with h5py.File(dataset_file, "r") as hf:
-        Output_dataset = np.array(hf["layer_output"])
+        Output_dataset = np.array(hf["outputs"])
 
     dataset_file = os.path.join(
         current_path,
-        f"Output_layer.h5",
+        f"Outputs_DNN.h5",
     )
     
     if os.path.isfile(dataset_file):
         with h5py.File(dataset_file, "r") as hf:
-            results_dataset = np.array(hf["layer_output"])
+            results_dataset = np.array(hf["outputs"])
 
 
         #print(len(np.reshape(Output_dataset,(-1))))
