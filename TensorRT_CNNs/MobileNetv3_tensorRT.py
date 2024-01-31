@@ -79,7 +79,7 @@ def main(args):
     )
     #print(args.golden)
 
-    TRT_model_name = "AlexNet_pytorch.rtr"
+    TRT_model_name = "MobileNetv3_pytorch.rtr"
     Num_outouts = 1000
     
     with open(os.path.join(path, "DNNs", currentFileName, TRT_model_name), "rb") as f:

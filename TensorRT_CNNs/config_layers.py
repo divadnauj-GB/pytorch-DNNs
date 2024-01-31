@@ -4,6 +4,7 @@ import numpy as np
 import argparse
 import json
 
+TCU = True
 
 def get_argparser():
     parser = argparse.ArgumentParser(description='DNN models')
@@ -38,7 +39,10 @@ def main(args):
     if USE_FP16:
         cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --inputIOFormats=fp16:chw --outputIOFormats=fp16:chw --fp16 "
     else:
-        cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --noTF32"
+        if TCU:
+            cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch"
+        else:
+            cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --noTF32"
     os.system(cmd)
     
     log_path_file = os.path.join(
@@ -63,6 +67,9 @@ def main(args):
         60,
         f"-t {layer_type} -n {model_name} -bs 1 -trt -sz {shape_str}"
     ]
+
+
+    os.system(f"python3 {model_name}_tensorRT.py --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
 
 
     layer_type = "DNNs"
@@ -79,7 +86,10 @@ def main(args):
     if USE_FP16:
         cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --inputIOFormats=fp16:chw --outputIOFormats=fp16:chw --fp16 "
     else:
-        cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --noTF32"
+        if TCU:
+            cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch"
+        else:
+            cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --noTF32"
     os.system(cmd)
     
     log_path_file = os.path.join(
@@ -104,6 +114,10 @@ def main(args):
         60,
         f"-t {layer_type} -n {model_name} -bs 1 -trt -sz {shape_str}"
     ]
+
+
+    os.system(f"python3 {model_name}_tensorRT.py --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
+
 
 
     layer_type = "DNNs"
@@ -120,7 +134,10 @@ def main(args):
     if USE_FP16:
         cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --inputIOFormats=fp16:chw --outputIOFormats=fp16:chw --fp16 "
     else:
-        cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --noTF32"
+        if TCU:
+            cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch"
+        else:
+            cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --noTF32"
     os.system(cmd)
     
     log_path_file = os.path.join(
@@ -145,6 +162,9 @@ def main(args):
         60,
         f"-t {layer_type} -n {model_name} -bs 1 -trt -sz {shape_str}"
     ]
+
+
+    os.system(f"python3 {model_name}_tensorRT.py --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
 
     layer_type = "DNNs"
     model_name = "ResNet50"
@@ -160,7 +180,10 @@ def main(args):
     if USE_FP16:
         cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --inputIOFormats=fp16:chw --outputIOFormats=fp16:chw --fp16 "
     else:
-        cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --noTF32"
+        if TCU:
+            cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch"
+        else:
+            cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --noTF32"
     os.system(cmd)
     
     log_path_file = os.path.join(
@@ -185,6 +208,9 @@ def main(args):
         60,
         f"-t {layer_type} -n {model_name} -bs 1 -trt -sz {shape_str}"
     ]
+
+    os.system(f"python3 {model_name}_tensorRT.py --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
+
 
     print(APPS_DICTIONAY)
     with open('DNN_WORKLOADS.json', 'w') as outfile:

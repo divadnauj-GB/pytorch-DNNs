@@ -213,7 +213,7 @@ def main(args):
             )
 
         embeddings_output = (torch.cat(Output).cpu().numpy())
-        
+        print(embeddings_output)
         log_path_file = os.path.join(
                 directory, f"Outputs_DNN.h5"
             )

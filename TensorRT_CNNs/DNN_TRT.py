@@ -5,6 +5,7 @@ import tensorrt as trt
 import pycuda.driver as cuda
 import pycuda.autoinit
 import argparse
+import copy
 
 
 
@@ -82,9 +83,9 @@ def main(args):
         # syncronize threads
         stream.synchronize()
 
-        layer_results.append(output)
+        layer_results.append(copy.deepcopy(output))
         if DEBUG: print(output)
-
+    print(layer_results)
     embeddings_outputs = np.concatenate(layer_results)
 
     if DEBUG: print(embeddings_outputs.shape)
