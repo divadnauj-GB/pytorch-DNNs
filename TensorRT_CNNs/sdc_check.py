@@ -43,6 +43,7 @@ def get_argparser():
     parser.add_argument('-onnx','--onnx', required=False, action='store_true', help='golden')
     parser.add_argument('-trt','--run_trt', required=False, action='store_true', help='golden')
     parser.add_argument('-v','--verbose', required=False, type=int, help='golden')
+    parser.add_argument('-fmt','--format', required=False, type=int, default=32, help='golden')
     return parser
 
 def main(args):

@@ -5,6 +5,12 @@ import argparse
 import json
 
 TCU = True
+USE_FP16 = True
+
+if USE_FP16:
+    FMT = 16
+else:
+    FMT = 32
 
 def get_argparser():
     parser = argparse.ArgumentParser(description='DNN models')
@@ -25,17 +31,17 @@ def main(args):
     num_images = 100
 
 
-    layer_type = "DNNs"
+    layer_type = "DNNs-fp16"
     model_name = "LeNet"
 
-    os.system(f"python3 {model_name}.py --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
+    os.system(f"python3 {model_name}.py -t {layer_type} --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
 
     path = f"{layer_type}/{model_name}"
     files_dir = os.listdir(os.path.join(current_path,path))
     path_onnx = [file for file in files_dir if ".onnx" in file][0]
     path_onnx = os.path.join(current_path,path,path_onnx)
     path_rtr = path_onnx.replace(".onnx",".rtr")
-    USE_FP16 = False
+    
     if USE_FP16:
         cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --inputIOFormats=fp16:chw --outputIOFormats=fp16:chw --fp16 "
     else:
@@ -57,7 +63,7 @@ def main(args):
     shape_str=""
     for idx in shape:
         shape_str+=f"{idx} "
-    cmd = f"PRELOAD_FLAG= GOLDEN_FLAG=1 APP_DIR=. BIN_DIR=. APP_BIN=DNN_TRT.py ./run.sh -t {layer_type} -n {model_name} -bs 1 -trt -sz {shape_str}"
+    cmd = f"PRELOAD_FLAG= GOLDEN_FLAG=1 APP_DIR=. BIN_DIR=. APP_BIN=DNN_TRT.py ./run.sh -t {layer_type} -n {model_name} -bs 1 -trt -fmt {FMT} -sz {shape_str}"
     print(cmd)
     os.system(cmd)
     APPS_DICTIONAY[f"{layer_type}-{model_name}"] =[
@@ -65,29 +71,29 @@ def main(args):
         "DNN_TRT.py",
         f"{current_path}",
         60,
-        f"-t {layer_type} -n {model_name} -bs 1 -trt -sz {shape_str}"
+        f"-t {layer_type} -n {model_name} -bs 1 -trt -fmt {FMT} -sz {shape_str}"
     ]
 
 
-    os.system(f"python3 {model_name}_tensorRT.py --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
-
-
-    layer_type = "DNNs"
+    os.system(f"python3 {model_name}_tensorRT.py -t {layer_type} --golden 1 -bs 1 -w {num_workers} -ims {num_images} -fmt {FMT}")
+        
+        
+    #layer_type = "DNNs"
     model_name = "AlexNet"
 
-    os.system(f"python3 {model_name}.py --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
+    os.system(f"python3 {model_name}.py -t {layer_type} --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
 
     path = f"{layer_type}/{model_name}"
     files_dir = os.listdir(os.path.join(current_path,path))
     path_onnx = [file for file in files_dir if ".onnx" in file][0]
     path_onnx = os.path.join(current_path,path,path_onnx)
     path_rtr = path_onnx.replace(".onnx",".rtr")
-    USE_FP16 = False
+    
     if USE_FP16:
         cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --inputIOFormats=fp16:chw --outputIOFormats=fp16:chw --fp16 "
     else:
         if TCU:
-            cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch"
+            cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch "
         else:
             cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --noTF32"
     os.system(cmd)
@@ -104,7 +110,7 @@ def main(args):
     shape_str=""
     for idx in shape:
         shape_str+=f"{idx} "
-    cmd = f"PRELOAD_FLAG= GOLDEN_FLAG=1 APP_DIR=. BIN_DIR=. APP_BIN=DNN_TRT.py ./run.sh -t {layer_type} -n {model_name} -bs 1 -trt -sz {shape_str}"
+    cmd = f"PRELOAD_FLAG= GOLDEN_FLAG=1 APP_DIR=. BIN_DIR=. APP_BIN=DNN_TRT.py ./run.sh -t {layer_type} -n {model_name} -bs 1 -trt -fmt {FMT} -sz {shape_str}"
     print(cmd)
     os.system(cmd)
     APPS_DICTIONAY[f"{layer_type}-{model_name}"] =[
@@ -112,30 +118,30 @@ def main(args):
         "DNN_TRT.py",
         f"{current_path}",
         60,
-        f"-t {layer_type} -n {model_name} -bs 1 -trt -sz {shape_str}"
+        f"-t {layer_type} -n {model_name} -bs 1 -trt -fmt {FMT} -sz {shape_str}"
     ]
 
 
-    os.system(f"python3 {model_name}_tensorRT.py --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
+    os.system(f"python3 {model_name}_tensorRT.py -t {layer_type} --golden 1 -bs 1 -w {num_workers} -ims {num_images} -fmt {FMT}")
 
 
 
-    layer_type = "DNNs"
+    #layer_type = "DNNs"
     model_name = "MobileNetv3"
 
-    os.system(f"python3 {model_name}.py --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
+    os.system(f"python3 {model_name}.py -t {layer_type} --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
 
     path = f"{layer_type}/{model_name}"
     files_dir = os.listdir(os.path.join(current_path,path))
     path_onnx = [file for file in files_dir if ".onnx" in file][0]
     path_onnx = os.path.join(current_path,path,path_onnx)
     path_rtr = path_onnx.replace(".onnx",".rtr")
-    USE_FP16 = False
+    
     if USE_FP16:
         cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --inputIOFormats=fp16:chw --outputIOFormats=fp16:chw --fp16 "
     else:
         if TCU:
-            cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch"
+            cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch "
         else:
             cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --noTF32"
     os.system(cmd)
@@ -152,7 +158,7 @@ def main(args):
     shape_str=""
     for idx in shape:
         shape_str+=f"{idx} "
-    cmd = f"PRELOAD_FLAG= GOLDEN_FLAG=1 APP_DIR=. BIN_DIR=. APP_BIN=DNN_TRT.py ./run.sh -t {layer_type} -n {model_name} -bs 1 -trt -sz {shape_str}"
+    cmd = f"PRELOAD_FLAG= GOLDEN_FLAG=1 APP_DIR=. BIN_DIR=. APP_BIN=DNN_TRT.py ./run.sh -t {layer_type} -n {model_name} -bs 1 -trt -fmt {FMT} -sz {shape_str}"
     print(cmd)
     os.system(cmd)
     APPS_DICTIONAY[f"{layer_type}-{model_name}"] =[
@@ -160,28 +166,28 @@ def main(args):
         "DNN_TRT.py",
         f"{current_path}",
         60,
-        f"-t {layer_type} -n {model_name} -bs 1 -trt -sz {shape_str}"
+        f"-t {layer_type} -n {model_name} -bs 1 -trt -fmt {FMT} -sz {shape_str}"
     ]
 
 
-    os.system(f"python3 {model_name}_tensorRT.py --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
+    os.system(f"python3 {model_name}_tensorRT.py -t {layer_type} --golden 1 -bs 1 -w {num_workers} -ims {num_images} -fmt {FMT}")
 
-    layer_type = "DNNs"
+    #layer_type = "DNNs"
     model_name = "ResNet50"
 
-    os.system(f"python3 {model_name}.py --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
+    os.system(f"python3 {model_name}.py -t {layer_type} --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
 
     path = f"{layer_type}/{model_name}"
     files_dir = os.listdir(os.path.join(current_path,path))
     path_onnx = [file for file in files_dir if ".onnx" in file][0]
     path_onnx = os.path.join(current_path,path,path_onnx)
     path_rtr = path_onnx.replace(".onnx",".rtr")
-    USE_FP16 = False
+    
     if USE_FP16:
         cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --inputIOFormats=fp16:chw --outputIOFormats=fp16:chw --fp16 "
     else:
         if TCU:
-            cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch"
+            cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch "
         else:
             cmd=f"/usr/src/tensorrt/bin/trtexec --onnx={path_onnx} --saveEngine={path_rtr} --explicitBatch --noTF32"
     os.system(cmd)
@@ -198,7 +204,7 @@ def main(args):
     shape_str=""
     for idx in shape:
         shape_str+=f"{idx} "
-    cmd = f"PRELOAD_FLAG= GOLDEN_FLAG=1 APP_DIR=. BIN_DIR=. APP_BIN=DNN_TRT.py ./run.sh -t {layer_type} -n {model_name} -bs 1 -trt -sz {shape_str}"
+    cmd = f"PRELOAD_FLAG= GOLDEN_FLAG=1 APP_DIR=. BIN_DIR=. APP_BIN=DNN_TRT.py ./run.sh -t {layer_type} -n {model_name} -bs 1 -trt -fmt {FMT} -sz {shape_str}"
     print(cmd)
     os.system(cmd)
     APPS_DICTIONAY[f"{layer_type}-{model_name}"] =[
@@ -206,10 +212,10 @@ def main(args):
         "DNN_TRT.py",
         f"{current_path}",
         60,
-        f"-t {layer_type} -n {model_name} -bs 1 -trt -sz {shape_str}"
+        f"-t {layer_type} -n {model_name} -bs 1 -trt -fmt {FMT} -sz {shape_str}"
     ]
 
-    os.system(f"python3 {model_name}_tensorRT.py --golden 1 -bs 1 -w {num_workers} -ims {num_images}")
+    os.system(f"python3 {model_name}_tensorRT.py -t {layer_type} --golden 1 -bs 1 -w {num_workers} -ims {num_images} -fmt {FMT}")
 
 
     print(APPS_DICTIONAY)

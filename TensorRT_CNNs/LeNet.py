@@ -19,6 +19,7 @@ import h5py
 def get_argparser():
     parser = argparse.ArgumentParser(description='DNN models')
     parser.add_argument('--golden', required=False, help='golden')
+    parser.add_argument('-t','--type', required=True, type=str, help='golden')
     parser.add_argument('-ln','--layer_number', required=False, type=int, default=0, help='golden')
     parser.add_argument('-bs','--batch_size', required=False, type=int, default=1, help='golden')
     parser.add_argument('-w','--workers', required=False, type=int, default=4, help='golden')
@@ -188,7 +189,7 @@ def main(args):
 
         currentPath = os.path.dirname(__file__)
         currentFileName = os.path.basename(__file__).split('.')[0]
-        directory = os.path.join(currentPath,"DNNs",currentFileName)
+        directory = os.path.join(currentPath,args.type,currentFileName)
 
         os.system(f"mkdir -p {directory}")
 

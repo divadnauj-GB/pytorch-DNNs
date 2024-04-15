@@ -11,13 +11,14 @@ import copy
 
 def get_argparser():
     parser = argparse.ArgumentParser(description='DNN models')
-    parser.add_argument('-t','--type', required=True, type=str, help='golden')
+    parser.add_argument('-t','--type', required=False, type=str, default="DNNs", help='golden')
     parser.add_argument('-n','--model_name', required=True, type=str, help='golden')
     parser.add_argument('-ln','--layer_number', required=False, type=int, help='golden')
     parser.add_argument('-bs','--batch_size', required=True, type=int, help='golden')
     parser.add_argument('-sz','--shape',required=False, nargs='+', type=int ,help="shape of the output layer")
     parser.add_argument('-onnx','--onnx', required=False, action='store_true', help='golden')
     parser.add_argument('-trt','--run_trt', required=False, action='store_true', help='golden')
+    parser.add_argument('-fmt','--format', required=False, type=int, default=32, help='golden')
     return parser
 
 DEBUG = 0
@@ -27,7 +28,11 @@ def main(args):
     path = os.path.dirname(__file__)
     # os.environ["CUDA_VISIBLE_DEVICES"]=""
     
-    target_dtype = np.float32
+    if args.format==16:
+        target_dtype = np.float16
+    else:
+        target_dtype = np.float32
+        
     current_path = os.path.dirname(__file__)
     path_dir = f"{args.type}/{args.model_name}"
     path_dir = os.path.join(current_path,path_dir)
@@ -59,7 +64,7 @@ def main(args):
         batch = 0
         sample_image = Input_dataset[
                     batch * batch_size : batch * batch_size + batch_size
-                ]
+                ].astype(target_dtype)
         d_input = cuda.mem_alloc(1 * sample_image.nbytes)
         d_output = cuda.mem_alloc(1 * output.nbytes)
         bindings = [int(d_input), int(d_output)]
@@ -73,7 +78,7 @@ def main(args):
     for batch in range(0, int(np.ceil(max_batches))):
         img = Input_dataset[
             batch * batch_size : batch * batch_size + batch_size
-        ]
+        ].astype(target_dtype)
 
         cuda.memcpy_htod_async(d_input, img, stream)
         # execute model
@@ -83,9 +88,9 @@ def main(args):
         # syncronize threads
         stream.synchronize()
 
-        layer_results.append(copy.deepcopy(output))
+        layer_results.append(copy.deepcopy(output.astype(np.float32)))
         if DEBUG: print(output)
-    print(layer_results)
+
     embeddings_outputs = np.concatenate(layer_results)
 
     if DEBUG: print(embeddings_outputs.shape)

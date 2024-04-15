@@ -12,17 +12,23 @@ import os, time
 def get_argparser():
     parser = argparse.ArgumentParser(description='DNN models')
     parser.add_argument('--golden', required=False, help='golden')
+    parser.add_argument('-t','--type', required=True, type=str, help='golden')
     parser.add_argument('-ln','--layer_number', required=False, type=int, default=0, help='golden')
     parser.add_argument('-bs','--batch_size', required=False, type=int, default=1, help='golden')
     parser.add_argument('-w','--workers', required=False, type=int, default=4, help='golden')
     parser.add_argument('-ims','--num_images', required=False, type=int, default=4, help='golden')
+    parser.add_argument('-fmt','--format', required=False, type=int, default=32, help='golden')
     return parser
 
 
 def main(args):
 
     BATCH_SIZE = args.batch_size
-    target_dtype = np.float32
+    if args.format==16:
+        target_dtype = np.float16
+    else:
+        target_dtype = np.float32
+        
     path = os.path.dirname(__file__)
     currentFileName = os.path.basename(__file__).split('.')[0].split('_')[0]
 
@@ -82,7 +88,7 @@ def main(args):
     TRT_model_name = "ResNet50_pytorch.rtr"
     Num_outouts = 1000
     
-    with open(os.path.join(path, "DNNs", currentFileName, TRT_model_name), "rb") as f:
+    with open(os.path.join(path, args.type, currentFileName, TRT_model_name), "rb") as f:
         runtime = trt.Runtime(trt.Logger(trt.Logger.WARNING)) 
         engine = runtime.deserialize_cuda_engine(f.read())
         context = engine.create_execution_context()
@@ -90,7 +96,7 @@ def main(args):
         output = np.empty([BATCH_SIZE, Num_outouts], dtype = target_dtype) 
         # allocate device memory
         for batch, (images, labels) in enumerate(test_loader):
-            sample_images = np.array(images, dtype=np.float32)
+            sample_images = np.array(images, dtype=target_dtype)
             break
 
         d_input = cuda.mem_alloc(1 * sample_images.nbytes)
@@ -104,7 +110,7 @@ def main(args):
         gacc5=0
         dummy_input=None
         for batch, (images, labels) in enumerate(test_loader):
-            images = np.array(images, dtype=np.float32)
+            images = np.array(images, dtype=target_dtype)
 
             cuda.memcpy_htod_async(d_input, images, stream)
             # execute model
@@ -113,7 +119,7 @@ def main(args):
             cuda.memcpy_dtoh_async(output, d_output, stream)
             # syncronize threads
             stream.synchronize()
-            outputs = torch.from_numpy(output)
+            outputs = torch.from_numpy(output.astype(np.float32))
             pred, clas=outputs.cpu().topk(5,1,True,True)
             clas = clas.t()
             pred = pred.t()
